@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>bootstrap simple</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css">
+
+  <!-- Custom styles for this template -->
+  <link href="css/style.min.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
+
+</head>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="global.js"></script>
+<script>
+  socket.on('acceptConnection', function (data) {
+    window.location.href = "connect.html";
+  });
+  socket.on('declineConnection', function (data) {
+    window.location.href = "index.html";
+  });
+  function accept() {   
+      socket.emit('mobileYes', "12345");
+  }
+  function decline() {   
+      socket.emit('mobileNo', "12345");
+  }
+</script>
+
+<body id="page-top">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="#page-top">
+        <img src="img/txt.png" style="height:2rem;">
+      </a>
+      <!-- <button class="navbar-toggler navbar-toggler-right text-uppercase" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button> -->
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <!-- <ul class="navbar-nav ml-auto">
+            <li class="nav-item mx-0 mx-lg-1">
+              <i class="fa fa-bars"></i>
+            </li>
+          </ul>          -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="masthead text-black text-center">
+    <div class="container" style="flex-direction: column;
+      justify-content: start;">
+      <img src="img/Loading_icon.gif" width="200px">
+      <span style="font-size: 20px;">Connecting...</span>
+      <button type="button" name="button" onclick="accept()">Accept</button>
+      <button type="button" name="button" onclick="decline()">Decline</button>
+    </div>
+  </header>
+
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Plugin JavaScript -->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+  <!-- Contact Form JavaScript -->
+  <script src="js/jqBootstrapValidation.js"></script>
+  <script src="js/contact_me.js"></script>
+
+  <!-- Custom scripts for this template -->
+  <script src="js/style.min.js"></script>
+
+
+</body>
+
+</html>

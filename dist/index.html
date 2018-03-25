@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>bootstrap simple</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css">
+
+  <!-- Custom styles for this template -->
+  <link href="css/style.min.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
+
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var map, markerWeb, markerMobile, phoneNumber, selfNumber="";
+  function onLoad() {
+    $("#loading").hide();
+    $("#failed").hide();
+    $("#connected").hide();
+    $("#request").show();
+  }
+  var socket = io.connect("http://localhost:80")
+  function sendRequest() {
+    phoneNumber = document.getElementById('phoneSearch').value;
+    socket.emit('searchPhone', phoneNumber);
+    $("#loading").show();
+    $("#failed").hide();
+    $("#connected").hide();
+    $("#request").hide();
+  }
+  socket.on('acceptConnection', function (data) {
+    console.log("accept", data);
+    $("#loading").hide();
+    $("#failed").hide();
+    $("#connected").show();
+    google.maps.event.trigger(map, 'resize');
+    $("#request").hide();
+    setInterval(sendLocation,1000);
+  });
+  socket.on('declineConnection', function (data) {
+    console.log("decline", data);
+    $("#loading").hide();
+    $("#failed").show();
+    $("#connected").hide();
+    $("#request").hide();
+  });
+  socket.on('locationUpdateFromWeb', function (data) {
+    var mobileLocation = { lat: data.lat+1, lng: data.long+1 };
+    markerMobile.setPosition(mobileLocation);
+  });
+  function tryAgain() {
+    $("#loading").hide();
+    $("#failed").hide();
+    $("#connected").hide();
+    $("#request").show();
+  }
+  function decline() {
+    socket.emit('mobileNo', "12345");
+  }
+  function setSelfNumber(){
+    selfNumber = document.getElementById('selfPhone').value;
+  }
+  function sendLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+  }
+  function showPosition(position) {
+    console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
+    var myLatLng = { lat: position.coords.latitude, lng: position.coords.longitude };
+    markerWeb.setPosition(myLatLng);
+    map.setCenter(myLatLng);
+    socket.emit('webConnected', position.coords.latitude,position.coords.longitude,phoneNumber,selfNumber );
+  }
+</script>
+<style>
+  .masthead .container {
+    height: auto;
+  }
+</style>
+
+<body id="page-top" onload="onLoad()">
+  <div id="loading" style="display:none">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">
+          <img src="img/txt.png" style="height:2rem;">
+        </a>
+        <!-- <button class="navbar-toggler navbar-toggler-right text-uppercase" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+              <i class="fa fa-bars"></i>
+            </button> -->
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <!-- <ul class="navbar-nav ml-auto">
+                <li class="nav-item mx-0 mx-lg-1">
+                  <i class="fa fa-bars"></i>
+                </li>
+              </ul>          -->
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="masthead text-black text-center">
+      <div class="container" style="flex-direction: column;
+          justify-content: start;">
+        <img src="img/Loading_icon.gif" width="200px">
+        <span style="font-size: 20px;">Connecting...</span>
+      </div>
+    </header>
+  </div>
+
+  <div id="failed" style="display:none">
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">
+          <img src="img/txt.png" style="height:2rem;">
+        </a>
+        <button class="navbar-toggler navbar-toggler-right text-uppercase" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+          aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item mx-0 mx-lg-1">
+              <i class="fa fa-bars"></i>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="masthead text-black text-center">
+      <div class="container" style="flex-direction: column;
+          justify-content: start;">
+        <img src="img/molumen-red-round-error-warning-icon.png" width="50px" style="margin-top:50px;">
+        <span style="font-size: 20px;margin-top:30px;">Connection denied</span>
+        <button type="button" name="button" onclick="tryAgain()">Try Again.</button>
+      </div>
+    </header>
+  </div>
+
+  <div id="connected" class="clearfix" style="height:1000px!important;display:none">
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">
+          <img src="img/txt.png" style="height:2rem;">
+        </a>
+        <button class="navbar-toggler navbar-toggler-right text-uppercase" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+          aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item mx-0 mx-lg-1">
+              <i class="fa fa-bars"></i>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="masthead text-black text-center">
+      <div class="container" style="flex-direction: column;
+          justify-content: start;">
+        <img src="img/291201.png" width="50px" style="margin-top:50px;">
+        <h4 style="margin-top: 20px;">Connected</h4>
+        <span>We have sent your location</span>
+        <span>Type in your telephone number</span>
+        <span>
+          <input id="selfPhone" type="text" style="padding-bottom: 5px;
+                width: 140px;box-shadow: 0 4px 2px -4px grey;color: #d7d7d7;" value="+47">
+          <i class="button fa fa-chevron-right" style="margin-left: -20px;color: #d7d7d7;" onclick="setSelfNumber()"></i>
+        </span>
+      </div>
+      <div id="map"></div>
+    </header>
+  </div>
+
+  <div id="request" style="display:none">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">
+          <img src="img/txt.png" style="height:2rem;">
+        </a>
+        <button class="navbar-toggler navbar-toggler-right text-uppercase" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+          aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item mx-0 mx-lg-1">
+              <i class="fa fa-bars"></i>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="header-input">
+        <span>Type in ID from wristband</span>
+        <span>
+          <input id="phoneSearch" type="text">
+          <i class="button fa fa-chevron-right" onclick="sendRequest()"></i>
+        </span>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="masthead text-black text-center" style="padding-bottom: 0px;">
+      <div class="container row" style="padding: 0px;">
+        <!-- <div>
+            <h1 class="mb-0">Type in the relevant KinderID</h1>
+            <input type="text">
+        </div>
+        <button>Next</button> -->
+        <div class="col-md-6 img1" onclick="location.href='comment.html';">
+          <img src="img/shop.png">
+          <span>Webshop</span>
+        </div>
+        <div class="col-md-6 img2" onclick="location.href='comment.html';">
+          <img src="img/customer-service.png">
+          <span>Customer service</span>
+        </div>
+
+      </div>
+    </header>
+  </div>
+
+
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Plugin JavaScript -->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+  <!-- Contact Form JavaScript -->
+  <script src="js/jqBootstrapValidation.js"></script>
+  <script src="js/contact_me.js"></script>
+
+  <!-- Custom scripts for this template -->
+  <script src="js/style.min.js"></script>
+  <script>
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: -34.397, lng: 150.644 },
+        zoom: 8,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      });
+      var myLatLng = { lat: -34.397, lng: 150.644 }
+      var imageWeb = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+      
+      markerWeb = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        icon: imageWeb
+      });
+      
+      var imageMobile = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+      markerMobile = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        icon: imageMobile 
+      });
+      map.setCenter(myLatLng);
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFrbM080e4ICOOXeWkO3Rlfj_GH9N4r9w&callback=initMap"></script>
+
+
+</body>
+
+
+</html>
